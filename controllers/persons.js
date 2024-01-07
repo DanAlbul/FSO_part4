@@ -1,44 +1,16 @@
+import Person from "../models/person.js"
 import express from "express"
-import morgan from "morgan"
-import cors from "cors"
-import dotenv from "dotenv"
-import Person from "./models/person.js"
 
-const app = express()
-dotenv.config()
-
-// === MIDDLEWARES ===
-const customMorganFormat = ":method :url :status :res[content-length] - :response-time ms :data"
-morgan.token("data", (req) => {
-  return JSON.stringify(req.body)
-})
-
-
-app.use(express.static("dist"))
-app.use(express.json())
-app.use(morgan(customMorganFormat))
-app.use(cors())
-
-// --- SERVER ---
-const PORT = process.env.PORT || 3004
-const hostname = `http://localhost:${PORT}`
-
-app.listen(PORT, () => {
-  console.log(`Server running at ${hostname}/`)
-})
-
-
-// ~~~ ROUTES ~~~
-
+const personsRouter = express.Router()
 // ~ Get all persons
-app.get("/api/persons", (req, res, next) => {
+personsRouter.get("/", (req, res, next) => {
   Person.find({}).then(persons => {
     return res.status(200).json(persons).end()
   }).catch(error => next(error))
 })
 
 // ~ Get info
-app.get("/info", (req, res, next) => {
+personsRouter.get("/info", (req, res, next) => {
   Person.find({}).then(persons => {
     const entries = Object.entries(persons)
     const today = new Date()
@@ -48,7 +20,7 @@ app.get("/info", (req, res, next) => {
 })
 
 // ~ Get person by id
-app.get("/api/persons/:id", (req, res, next) => {
+personsRouter.get("/:id", (req, res, next) => {
   Person.findById(req.params.id).then(person => {
     if (person) {
       return res.json(person).end()
@@ -59,7 +31,7 @@ app.get("/api/persons/:id", (req, res, next) => {
 })
 
 // ~ Remove person by id
-app.delete("/api/persons/:id", (req, res, next) => {
+personsRouter.delete("/:id", (req, res, next) => {
   console.log(req.params.id)
   Person.findByIdAndDelete(req.params.id).then(person => {
     if (person === null) return res.status(404).send(`Number by id ${req.params.id} is not found`).end()
@@ -68,7 +40,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
 })
 
 // ~ Create person by id
-app.post("/api/persons", (req, res, next) => {
+personsRouter.post("/", (req, res, next) => {
   const data = req.body
   const newNumber = new Person({
     name: data.name,
@@ -81,7 +53,7 @@ app.post("/api/persons", (req, res, next) => {
 })
 
 // ~ Update person by id
-app.put("/api/persons/:id", (req, res, next) => {
+personsRouter.put("/:id", (req, res, next) => {
   const data = req.body
   const newNumber = {
     name: data.name,
@@ -96,17 +68,4 @@ app.put("/api/persons/:id", (req, res, next) => {
 })
 // ~~~ END OF ROUTES ~~~
 
-const unknownEndpoint = (req, res) => res.status(404).send({ error: "unknown endpoint" })
-app.use(unknownEndpoint)
-
-
-const errorHandler = (error, req, res, next) => {
-  console.error(error)
-  if (error.name === "CastError")
-    return res.status(400).send({ error: "malformatted id" })
-  else if (error.name === "ValidationError") {
-    return res.status(400).json({ error: error.message, type: error.name })
-  }
-  next(error)
-}
-app.use(errorHandler)
+export default personsRouter
