@@ -2,14 +2,13 @@ import express from "express"
 import morgan from "morgan"
 import cors from "cors"
 import dotenv from "dotenv"
-import personsRouter from "./controllers/persons.js"
+import blogsRouter from "./controllers/blogs.js"
 import mongoose from "mongoose"
 import logger from "./utils/logger.js"
 import middleware from "./utils/middleware.js"
 dotenv.config()
 
 mongoose.set("strictQuery", false)
-
 const url = process.env.MONGODB_URI
 
 console.log("connecting to MongoDB...")
@@ -35,7 +34,7 @@ app.use(express.static("dist"))
 app.use(express.json())
 app.use(morgan(customMorganFormat))
 
-app.use('/api/persons', personsRouter)
+app.use('/api/blogs', blogsRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.requestLogger)

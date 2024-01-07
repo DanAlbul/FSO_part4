@@ -1,0 +1,21 @@
+@hostname = http://localhost:3006
+
+### Get all blogs
+GET {{hostname}}/api/blogs
+
+### Get blog by id
+GET {{hostname}}/api/blogs/659a9919bb3ae892c757a945
+
+### Remove blog by id
+DELETE {{hostname}}/api/blogs/3
+
+### Add new blog
+POST {{hostname}}/api/blogs
+Content-Type: application/json
+
+{
+  "title": "How to Write Code",
+  "author": "Daniel Albs",
+  "url": "https://www.google.com/write-code-albs",
+  "likes": "531"
+}
